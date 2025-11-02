@@ -1,0 +1,19 @@
+Analyze this robot environment, captured from left and right camera views. Based on this scene, please create an action plan that ends with the task: <task>. If the task is already achieved in the scene, you should disrupt the scene so the task is not achieved anymore, and then plan to achieve the task.
+
+The following atomic actions are available:
+<actions>
+
+Please provide your final answer in the following format:
+```json
+{
+    "description": "<description of the scene>",
+    "actions": [
+        {
+            "action": "<action to execute>",
+            "action_letter": "<list letter>",
+            "reasoning": "<reasoning for action>"
+        },
+        ...
+    ]
+}
+``` 

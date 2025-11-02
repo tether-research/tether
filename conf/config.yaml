@@ -1,0 +1,48 @@
+
+defaults:
+  - _self_
+  - setting: real
+
+mode: "cycle"
+action: ""  # Used during single mode
+num_warp_attempts: 3
+num_planners: 2
+library_rebuild_interval: 0
+
+residual:
+  name: "default"
+  level: "off"
+
+run:
+  wandb_project: "trajectory_warping_cycle"
+  exp_name: ${now:%Y-%m-%d_%H-%M-%S}
+  overwrite_cfg: false
+
+exp_path: ./data_${setting.name}/runs/${run.exp_name}
+
+global_demo_path: ./data_${setting.name}/demos
+demo_path: ${exp_path}/demos
+scene_path: ${exp_path}/scenes
+rollout_path: ${exp_path}/rollouts
+condense_path: ${exp_path}/condense
+cache_path: ./cache
+prompt_path: ./prompts
+
+vlm:
+  model_smart: google/gemini-robotics-er-1.5-preview
+  api_key_smart: <YOUR_API_KEY_HERE>
+  thinking_budget_smart: 4096
+
+  model_fast: google/gemini-robotics-er-1.5-preview
+  api_key_fast: <YOUR_API_KEY_HERE>
+  thinking_budget_fast: 0
+
+
+hydra:
+  run:
+    dir: ${exp_path}
+
+  job_logging:
+    root:
+      level: WARNING
+  verbose: false

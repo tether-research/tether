@@ -1,0 +1,38 @@
+
+name: real
+
+object_names:
+  "pineapple toy": "A small, yellow, textured object resembling a pineapple with a green leafy top."
+  "pink bowl": "A small, round, light pink bowl with a smooth surface."
+  "wooden bookshelf": "A light wood-finish bookshelf with three open shelves."
+  "bookshelf middle shelf": "The middle shelf of the bookshelf."
+
+demo_names:
+  bowl-table-shelf: "pick up bowl from table and place it on middle shelf"
+  bowl-shelf-table: "pick up bowl from the middle shelf and place it on table"
+  pineapple-table-bowl: "pick up pineapple from table and place in bowl on table"
+  pineapple-bowl-table: "pick up pineapple from bowl and place on table"
+  pineapple-shelf-table: "pick up pineapple from shelf and place on table"
+  pineapple-table-shelf: "pick up pineapple from table and place on shelf"
+
+gripper_len: 0.18
+
+hand_cameras:
+  hand_camera: "15512737"
+cameras:
+  varied_camera_1: "26368109"
+  varied_camera_2: "25455306"
+
+image_size: [1280, 720]
+image_crop:
+  varied_camera_1: [0, 0, 0, 0]
+  varied_camera_2: [0, 0, 0, 0]
+
+oob_bounds:
+  x: [0.2, 1]
+  y: [-0.6, 0.6]
+  z: [-0.1, 1]
+
+control_hz: 15
+anchor_offsets: [0.0]
+mast3r_error_thres: 10

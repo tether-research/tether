@@ -1,0 +1,11 @@
+For this task, you will see a robot trying to perform the task of <task>. You may see multiple camera views of the same scene. Some cameras are static and are mounted outside of the scene and some cameras are mounted on the robot arms and thus they are moving during the episode.
+The first 3 images show multiple camera views from the start of the episode (some time ago). The last 3 images show multiple camera views from the current moment in the episode (as it is now).
+Looking at these images and comparing the start of the episode with current state did the robot successfully perform the task "<task>"? Make sure that the task is completed without disrupting other objects in the scene. 
+
+
+Please think step by step and provide your reasoning. Then, provide your final answer in the following format:
+```json
+{
+    "reasoning": <reasoning for evaluation>,
+    "completed": <true or false>
+}
