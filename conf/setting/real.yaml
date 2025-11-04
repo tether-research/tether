@@ -1,12 +1,6 @@
 
 name: real
 
-object_names:
-  "pineapple toy": "A small, yellow, textured object resembling a pineapple with a green leafy top."
-  "pink bowl": "A small, round, light pink bowl with a smooth surface."
-  "wooden bookshelf": "A light wood-finish bookshelf with three open shelves."
-  "bookshelf middle shelf": "The middle shelf of the bookshelf."
-
 demo_names:
   bowl-table-shelf: "pick up bowl from table and place it on middle shelf"
   bowl-shelf-table: "pick up bowl from the middle shelf and place it on table"

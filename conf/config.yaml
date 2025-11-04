@@ -9,10 +9,6 @@ num_warp_attempts: 3
 num_planners: 2
 library_rebuild_interval: 0
 
-residual:
-  name: "default"
-  level: "off"
-
 run:
   wandb_project: "trajectory_warping_cycle"
   exp_name: ${now:%Y-%m-%d_%H-%M-%S}

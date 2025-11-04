@@ -25,7 +25,6 @@ def load_geo_aware(port):
     return manager.GeoAware()
 
 geo_aware = load_geo_aware(port=50011)
-geo_aware_eval = load_geo_aware(port=50012)
 
 class Mast3rManager(BaseManager):
     pass

@@ -35,7 +35,7 @@ def collect_scene_image(cfg):
 @timer
 def send_trajectory(cfg, demo_dir, task, save=True):
     print("Sending trajectory...")
-    subprocess.run(["rsync", "-avz", f"{demo_dir}/pipeline/trajectory_eva.npy", "eth.franka.franka-laptop:/home/franka/eva/base_trajectories/default/trajectory.npy"], check=True, stdout=subprocess.DEVNULL)
+    subprocess.run(["rsync", "-avz", f"{demo_dir}/pipeline/trajectory_final.npy", "eth.franka.franka-laptop:/home/franka/eva/base_trajectories/default/trajectory.npy"], check=True, stdout=subprocess.DEVNULL)
     rollout_dir = remote_runner.run_trajectory_warping("default", "default", "off", task)
     if save:
         subprocess.run(["rsync", "-avz", "--exclude='*.svo2'", "--exclude='*.jpg'", f"eth.franka.franka-laptop:{rollout_dir}", f"{cfg.rollout_path}"], check=True, stdout=subprocess.DEVNULL)

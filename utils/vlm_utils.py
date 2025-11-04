@@ -15,7 +15,6 @@ import concurrent.futures
 import cv2
 import hashlib
 
-from openai import OpenAI
 from google import genai
 
 
@@ -37,9 +36,7 @@ class VlmWrapper:
         self.api_key = api_key
         org, name = model.split("/")
         self.org, self.name = org, name
-        if org == "openai":
-            print(f"Configured OpenAI model {name}")
-        elif org == "google":
+        if org == "google":
             print(f"Configured Gemini model {name}")
         else:
             print(f"Organization {org} unknown, skipping model initialization")
@@ -78,55 +75,14 @@ class VlmWrapper:
 
     def query_async(self, messages, retries=10, temperature=None, system_instruction=None, save_path=None, future_id=None):
         return self.executor.submit(lambda: (future_id, self.query(messages, retries, temperature, system_instruction, save_path)))
-    # 
+     
     def run_query(self, messages, retries=10, temperature=None, system_instruction=None):
-        if self.org == "openai":
-            def encode_image(image_path):
-                with open(image_path, "rb") as image_file:
-                    return base64.b64encode(image_file.read()).decode("utf-8")
-            def encode_content(content):
-                if isinstance(content, Image.Image):
-                    buffered = BytesIO()
-                    content.save(buffered, format="JPEG")
-                    buffered.seek(0)
-                    img_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-                    return {"type": "input_image", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}}
-                elif isinstance(content, Path):
-                    if content.suffix in [".jpg", ".jpeg", ".png"]:
-                        img_b64 = encode_image(str(content))
-                        return {"type": "input_image", "image_url": f"data:image/jpeg;base64,{img_b64}", "detail": "high"}
-                    elif content.suffix in [".mp4"]:
-                        frames = []
-                        video = cv2.VideoCapture(str(content))
-                        while video.isOpened():
-                            success, frame = video.read()
-                            if not success:
-                                break
-                            _, buffer = cv2.imencode(".jpg", frame)
-                            frames.append(base64.b64encode(buffer).decode("utf-8"))
-                        video.release()
-                        print(len(frames), " frames read.")
-                        return list(map(lambda x: {"image": x, "resize": 768}, frames[::5]))
-                elif isinstance(content, str):
-                    return {"type": "input_text" , "text": content}
-
-            formatted_messages = []
-            for msg in messages:
-                content = encode_content(msg)
-                if isinstance(msg, Path) or isinstance(msg, Image.Image):
-                    if isinstance(content, list):
-                        formatted_messages.extend(content)
-                    else:
-                        formatted_messages.append(content)
-                else:
-                    formatted_messages.append(content)
-
-            formatted_messages = [{"role": "user", "content": formatted_messages}]
-        elif self.org == "google":
+        if self.org == "google":
             filepaths = []
             for i, message in enumerate(messages):
-                filepaths.append(str(message))
-                messages[i] = len(filepaths) - 1
+                if isinstance(message, Path):
+                    filepaths.append(str(message))
+                    messages[i] = len(filepaths) - 1
 
             messages = self.upload_files(messages, filepaths)
             messages = {"role": "user", "parts": messages}
@@ -134,22 +90,7 @@ class VlmWrapper:
             raise NotImplementedError
         
         def call_api(self):
-            if self.org == "openai":
-                client = OpenAI(api_key=self.api_key)
-                if "o1" in self.name or "o3" in self.name or "o4" in self.name:
-                    # O1 does not support temperature
-                    response = client.responses.create(
-                        model=self.name,
-                        reasoning={"effort": "low"},
-                        input=formatted_messages
-                    )
-                else:
-                    response = client.responses.create(
-                        input=formatted_messages,
-                        temperature=temperature,
-                        model=self.name
-                    )
-            elif self.org == "google":
+            if self.org == "google":
                 client = genai.Client(api_key=self.api_key)
                 config = genai.types.GenerateContentConfig(
                     temperature=temperature,
@@ -158,10 +99,10 @@ class VlmWrapper:
                 )
                 response = client.models.generate_content(
                     model=self.name,
-                    contents=messages["parts"]
+                    contents=messages["parts"],
                     config=config
                 )
-            elif self.org == "anthropic":
+            else:
                 raise NotImplementedError
             return response
 
@@ -171,9 +112,7 @@ class VlmWrapper:
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     future = executor.submit(call_api, self)
                     response = future.result(timeout=90)
-                if self.org == "openai":
-                    response = response.output_text
-                elif self.org == "google":
+                if self.org == "google":
                     response = response.text
                 break
             except concurrent.futures.TimeoutError:

@@ -12,7 +12,10 @@ def douglas_peucker(points, prior_indices=None, epsilon=0.1):
     def recurse(points, indices, epsilon):
         start, end = points[0], points[-1]
         line_vec = end - start
-        line_len = np.linalg.norm(line_vec) line_dir = line_vec / line_len vec_to_points = points - start t = np.dot(vec_to_points, line_dir)
+        line_len = np.linalg.norm(line_vec) 
+        line_dir = line_vec / line_len 
+        vec_to_points = points - start 
+        t = np.dot(vec_to_points, line_dir)
         t_clamped = np.clip(t, 0, line_len)
         projection = np.outer(t_clamped, line_dir) + start
         distances = np.linalg.norm(points - projection, axis=1)

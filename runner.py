@@ -13,6 +13,7 @@ import numpy as np
 import concurrent.futures
 import subprocess
 from deepdiff import DeepDiff
+import os
 
 from extract_keypoint_trajectory import extract_keypoint_trajectory 
 from annotate_trajectory import annotate_demo_trajectory, annotate_rollout_trajectory
@@ -167,7 +168,6 @@ class Runner:
         self.reload_action_library()
 
     def prepare_bootstrap(self):
-        self.object_names = self.cfg.setting.object_names
         self.action_library = {}
         for multi_demo_dir, action in self.cfg.setting.demo_names.items():
             self.action_library[action] = []
@@ -214,7 +214,7 @@ class Runner:
     def generate_action_plan(self, scene_dir, target_task):
         while True:
             try:
-                action_plan = query_gemini_plan_actions(self.cfg, self.vlm_fast, target_task, list(self.action_library.keys()), self.object_names, scene_dir, save_dir=self.cfg.exp_path)
+                action_plan = query_gemini_plan_actions(self.cfg, self.vlm_fast, target_task, list(self.action_library.keys()), scene_dir, save_dir=self.cfg.exp_path)
                 return action_plan
             except Exception as e:
                 print(f"Error while generating action plan: {e}")
@@ -247,7 +247,7 @@ class Runner:
             eval_dir.mkdir(exist_ok=True)
             demo_name = demo_dir.name
             try:
-                evaluation_response = query_gemini_evaluate_success(self.cfg, self.vlm_smart, rollout_dir, action, self.object_names, keypoint_indices, output_dir=eval_dir)
+                evaluation_response = query_gemini_evaluate_success(self.cfg, self.vlm_smart, rollout_dir, action, keypoint_indices, output_dir=eval_dir)
                 success = evaluation_response["completed"]
             except Exception as e:
                 print(f"Error while evaluating rollout: {e}")
@@ -449,6 +449,14 @@ def run_pipeline(cfg: DictConfig):
     cfg.condense_path = Path(cfg.condense_path).resolve()
     cfg.cache_path = Path(cfg.cache_path).resolve()
     cfg.prompt_path = Path(cfg.prompt_path).resolve()
+
+    # Create cache directories if they don't exist
+    if not os.path.exists(cfg.cache_path):
+        os.makedirs(cfg.cache_path)
+    if not os.path.exists(cfg.cache_path / "mast3r"):
+        os.makedirs(cfg.cache_path / "mast3r")
+    if not os.path.exists(cfg.cache_path / "geo_aware"):
+        os.makedirs(cfg.cache_path / "geo_aware")
 
     runner = Runner(cfg)
     if cfg.mode == "cycle":

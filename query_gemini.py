@@ -4,8 +4,7 @@ import string
 from utils.annotation_utils import concatenate_images
 
 
-def query_gemini_plan_actions(cfg, vlm, target_task, action_list, object_names, scene_dir, save_dir=None, retries=10):
-    object_names = "".join([f"  - {name}: {desc}\n" for name, desc in object_names.items()])
+def query_gemini_plan_actions(cfg, vlm, target_task, action_list, scene_dir, save_dir=None, retries=10):
     action_list = "\n".join([f"  {string.ascii_lowercase[i]}. " + action for i, action in enumerate(action_list)])
     for _ in range(retries):
         try:
@@ -13,7 +12,6 @@ def query_gemini_plan_actions(cfg, vlm, target_task, action_list, object_names, 
                 determine_prompt = f.read()
                 determine_prompt = determine_prompt.replace("<task>", target_task.rstrip("."))
                 determine_prompt = determine_prompt.replace("<actions>", action_list)
-                determine_prompt = determine_prompt.replace("<objects>", object_names)
             
             if save_dir is not None:
                 save_path = save_dir / f"transcript_decision.md"
@@ -36,12 +34,10 @@ def query_gemini_plan_actions(cfg, vlm, target_task, action_list, object_names, 
             continue
 
 
-def query_gemini_evaluate_success(cfg, vlm, trajectory_dir, action, object_names, keypoint_indices, output_dir):
+def query_gemini_evaluate_success(cfg, vlm, trajectory_dir, action, keypoint_indices, output_dir):
     with open(cfg.prompt_path / "evaluate_success.txt", "r") as f:
         prompt = f.read()
         prompt = prompt.replace("<task>", action.rstrip("."))
-        object_names = "".join([f"  - {name}: {desc}\n" for name, desc in object_names.items()])
-        prompt = prompt.replace("<object_names>", object_names)
 
     # Only use first and last keypoint
     first_keypoint = keypoint_indices[0]
