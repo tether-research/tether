@@ -4,7 +4,6 @@
 
 [[Website]]
 [[arXiv]]
-[[PDF]]
 
 [William Liang](https://willjhliang.github.io), [Sam Wang](https://samuelwang23.github.io/), [Hung-Ju Wang](https://www.linkedin.com/in/hungju-wang),<br>
 [Osbert Bastani](https://obastani.github.io/), [Yecheng Jason Ma<sup>†</sup>](https://jasonma2016.github.io/), [Dinesh Jayaraman<sup>†</sup>](https://www.seas.upenn.edu/~dineshj/)
@@ -24,44 +23,45 @@ The ability to conduct and learn from self-directed interaction and experience i
 # Installation
 The following instructions will install everything three conda environments: one main environment for the tether code, and two conda environments for running GeoAware and Mast3r. We have tested on Ubuntu 20.04.
 
-1. Create the main Conda environment with:
+1. Create the Tether conda environment with:
     ```
     conda create -n tether python=3.10
     conda activate tether
     pip install -r requirements.txt
     ```
 
-2. Follow the instructions [here](https://github.com/Junyi42/GeoAware-SC?tab=readme-ov-file#environment-setup) to setup the conda environment for GeoAware. 
+2. Set up the GeoAware conda environment with the instructions [here](https://github.com/Junyi42/GeoAware-SC?tab=readme-ov-file#environment-setup).
 
-3. Follow the instructions [here](https://github.com/naver/mast3r) to setup the conda environment for Mast3r.
-   
-4. For real world experiments, we deploy Tether with [Eva](https://github.com/willjhliang/eva), our Franka Infrastructure code. Installation instructions for Eva can be found (here)[https://github.com/willjhliang/eva?tab=readme-ov-file#installation].
+3. Set up the MASt3R conda environment with the instructions [here](https://github.com/naver/mast3r).
+
+4. Install our [Eva](https://github.com/willjhliang/eva) Franka infra, or prepare your own (more details below).
 
 # Usage
 1. Set your Gemini API key in `conf/config.yaml` under the `api_key_smart` and `api_key_fast` fields.
 
-2. Collect the initial set of demonstrations for your target tasks. Place your demonstrations for the given setting (eg. "real") under the `./data_<SETTING_NAME>/demos` folder.
+2. Collect the initial set of demonstrations for your target tasks. Place your demonstrations under `data_real/demos`.
 
-3. Edit the demo_names list in the `./conf/setting/<SETTING_NAME>.yaml` configuration to match your demonstration set. The format of this list is: `<name of the subdirectory in demo folder>`: `<desired natural instruction for Gemini action planning and success evaluation>`
+3. Edit the demo_names list in the `conf/setting/real.yaml` configuration to match your demonstration set. The format of this list is: `<name of the subdirectory in demo folder>`: `<desired natural instruction for Gemini action planning and success evaluation>`
 
-4. In `./conf/setting/real.yaml`, modify the camera parameters to be the ZED camera serial numbers in your setup. You can find the serial numbers for your cameras using [these instructions](https://support.stereolabs.com/hc/en-us/articles/19540095753111-How-can-I-get-the-serial-number-of-my-camera).
+4. In `conf/setting/real.yaml`, modify the camera parameters to be the ZED camera serial numbers in your setup. You can find the serial numbers for your cameras using [these instructions](https://support.stereolabs.com/hc/en-us/articles/19540095753111-How-can-I-get-the-serial-number-of-my-camera).
 
-5. Adjust the oob_bounds parameters to the desired workspace in your scene. If the robot exceeds the desired workspace parameters during the execution of a trajectory, it will stop.
+5. Adjust the `oob_bounds` parameters to the desired workspace in your scene. If the robot exceeds the desired workspace parameters during the execution of a trajectory, it will stop.
+
+6. If using Eva, update the ip address in `robot_utils.py` to the Eva machine's ip. Otherwise, implement `collect_scene_image()` and `send_trajectory()` in `robot_utils.py` following your robot infra.
 
 # Running the Policy
 
 1. In the respective conda environments from the last section, start the servers for GeoAware and Mast3r by running `serve_geoaware.py` and `server_mast3r.py`. Wait for the servers to both print Serving ... before proceeding.
 
-2. Follow the instructions for starting up the Eva server and runner [here](https://github.com/willjhliang/eva?tab=readme-ov-file#startup).
+2. Start the Eva server and runner [here](https://github.com/willjhliang/eva?tab=readme-ov-file#startup), or prepare your own robot infra.
 
-3. To generate a single rollout, run `python runner.py mode=single action=<Name of action from setting config>`. This will select a random demo for your specified action and warp it for the current scene. The rollout data will be saved under `data_{setting}/runs/<run_name>/rollouts_single`.
+3. To generate a single rollout, run `python runner.py mode=single action=<Name of action from setting config>`. This will select a random demo for your specified action and warp it for the current scene. The rollout data will be saved under `data_real/runs/<run_name>/rollouts_single`.
 
-4. To run the autonomous play procedure, run `python runner.py mode=cycle`. This will begin by preprocessing the demos into the action library. It then will will run a cycle of action selection with the VLM, executing the selected action using Tether, and success evaluation using the VLM. The rollout data will be saved under `data_{setting}/runs/<run_name>/rollouts_cycle`.
+4. To run the autonomous play procedure, run `python runner.py mode=cycle`. This will begin by preprocessing the demos into the action library. It then will will run a cycle of action selection with the VLM, executing the selected action using Tether, and success evaluation using the VLM. The rollout data will be saved under `data_real/runs/<run_name>/rollouts_cycle`.
 
 ## Acknowledgements
 We thank the following open-sourced projects:
-* We calcualte correspondences using the [GeoAware-SC](https://github.com/Junyi42/GeoAware-SC) and [mast3r](https://github.com/naver/mast3r) projects.
-* Our Franka hardware setup is from [DROID](https://github.com/Junyi42/GeoAware-SC/tree/b20fab9c2d4f686536be9db34d1fb2079240fdd5).
+* We compute correspondences using [GeoAware-SC](https://github.com/Junyi42/GeoAware-SC) and [MASt3R](https://github.com/naver/mast3r).
 * Our deployment infrastructure,[Eva](https://github.com/willjhliang/eva), builds on [DROID](https://droid-dataset.github.io/droid/docs/software-setup)'s software setup.
 
 # License
